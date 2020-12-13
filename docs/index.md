@@ -1,7 +1,32 @@
-# COVID-19 Q&A deployment source code
+# Welcome to COVID-19 Q&A deployment
 
+## Project layout
 
-[![docker build status](https://img.shields.io/badge/docker_build-passing-emerald.svg)](#) [![Website](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](http://13.92.197.252/) 
+    covid_qna    
+    ├─ data/                   # Stores the data and .py file for downloading the data.
+    │  └─ data_download.py     # Code for downloading all the lucene-indexed data.
+    │
+    ├─ src/                    # Contains all the code necessary for execution of the application.
+    │  └─ main.py              # Has the definition of every API that is calling the modules class.
+    │  └─ init_models.py       # Used for downloading and initializing all the models.
+    │  └─ modules.py           # Contains all the function definitions for the various modules.
+    │
+    ├─ results/                # Stores the results of each query.
+    │  └─ rich_text.json       # Example API rersponse as json for rich-text query.
+    │  └─ detailed_text.json   # Example API rersponse as json for detailed-text query.
+    │
+    └─ requirements.txt        # List of all python packages that are used.
+    └─ Dockerfile              # Definition for building the docker image.
+    └─ docker-compose.yaml     # YAML definition of docker-compose for easy deployment.
+    └─ README.md
+
+___
+
+## Pipeline details
+
+A simple workflow for the entire application can be summarized as follows:
+![simple pipeline](simple_pipeline.png)
+___This application has utilized multiple modules each of which can be splitted and used seperately if required. If you would like to have a deeper understanding of how every module is working and the design choices at each and every step please click [here](implementation.md) or else you can use the navbar to navigate to the Implementation Details section.___
 
 ___
 
@@ -9,11 +34,29 @@ ___
 ![Python 3.8](https://img.shields.io/badge/python-v3.8-blue.svg) (app running on FastAPI backend)
 
 
-#### This version has been modified slightly from the original version so that it can run without using GPU acceleration.
+___This version has been modified slightly from the original version so that it can run without using GPU acceleration.___
 * __If you would like to view the actual code with GPU acceleration that uses both Pytorch and Tensorflow please visit the master branch of the [bitbucket repo](https://bitbucket.org/bridgei2idev/covid_qna/src/master/). This code is similar to the no_gpu branch of the [repo](https://bitbucket.org/bridgei2idev/covid_qna/src/no_gpu/).__
 * Please make sure to check the all files and comments and make necessary changes if required before building with docker.
 * This is the python code for deployment purpose only. Once the indexes are built, the lucene index folder should be updated. *This code will NOT build the lucene indexes*.
 
+___
+
+## Prerequisites
+
+* If you are planning to build and test (deploy) with docker then Docker CE or Docker EE needs to be installed. (Instuctions for installing docker are also covered in this documentation.)
+* If you planning to not use docker then please use Linux environment to test. As of now this application will NOT run natively on windows OS.
+* Python version 3.6 and above is supported.
+* Corresponding pip version should also be present.
+
+___
+
+## Testing
+
+The application was mainly designed as a quick response action item to the COVID-19 situation. Since there is a huge volume of unstructured data that needed to be mined this application was developed.
+
+The testing is done mainly on the CORD-19 research dataset which has over 50,000 coronavirus and COVID-19 research articles apart from other articles as well. Total count of articles in the dataset as of date 17/09/2020 is 266175 (including duplicates).
+
+You can visit this [site](http://13.92.197.252/) for check the application.
 ___
 
 ## Steps for building and executing
@@ -39,6 +82,7 @@ pip install tqdm
 python data_download.py
 ```
 On running these commands the lucene index data in a .tar.gz file (4.5GB approx) will be downloaded.
+
 * Navigate back to the root directory and run the following commands in sequence in order to build and run the docker images. *(Please check if you have edited the module.py file)*
 ```
 cd ..
@@ -52,14 +96,15 @@ docker-compose up -d
 ##### For Linux systems
 Open your terminal and type the following commanda to get docker and docker-compose installed.
 ```
-# For installing Docker
+<!-- For installing Docker -->
 sudo apt install docker.io
 docker --version
 
-# If you are unable to see the docker version then use the below command to add the current user to docker group and logout and log back in and then re-run the command to check the version.
+<!-- If you are unable to see the docker version then use the below command to add the current user to 
+docker group after that logout and log back in and then re-run the above command to check the version. -->
 sudo usermod -aG docker $USER
 
-# For installing docker-compose
+<!-- For installing docker-compose -->
 sudo apt install docker-compose
 docker-compose version
 ```
@@ -75,6 +120,7 @@ pip install tqdm
 python data_download.py
 ```
 On running these commands the lucene index data in a .tar.gz file (4.5GB approx) will be downloaded.
+
 * Navigate back to the root directory and run the following commands in sequence in order to build and run the docker images. *(Please check if you have edited the module.py file)*
 ```
 cd ..
@@ -84,7 +130,7 @@ docker-compose up -d
 * The first command will build the docker images. It will take sometime (about 20-30mins depending on your internet speed and system processing speed.)*
 * Once everything is done the application should start. In order to access the UI for the python APIs then please visit ```http://localhost:5000/docs/```.
 
-##### Removing any temporary images that were created while building
+##### Removing temporary images
 Once the docker images are built you can choose to run the prune command to remove any intermediate/unused images that were created in the process of building the images. In order to do that please use the following command.
 ```
 docker system prune
@@ -133,4 +179,19 @@ uvicorn --host 0.0.0.0 app:app
 
 ___
 
-*In case of any issues please reach out to [me](mailto:swastik.biswas@bridgei2i.com).*
+## Bugs
+
+* Application does not run natively on Windows OS.
+* While using the rich-text/detailed-text API if there are no matches found then the response is given as an internal server error. It does not mean that the code has crashed. It is simply because it has not found anything to respond back. This bug will be fixed in the next version.
+
+___
+
+## Future scope
+
+* The objective is to build a NLP engine so powerful that it can act by itself as a search engine over any kind of documented large scale data.
+* Extend scope to include direct parsing of PDF or other documents and build indexes by itself.
+* Add more flexibilty to support indexes from Elasticsearch and Apache Solr.
+___
+
+*I hope there would not be any problems while running the application. However, in case of any issues please reach out to [me](swastik.biswas@bridgei2i.com).*
+

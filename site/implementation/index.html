@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Implementation Details - covid_qna</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Implementation Details";
+    var mkdocs_page_input_path = "implementation.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../index.html" class="icon icon-home"> covid_qna</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Pipeline Details</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="#">Implementation Details</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#lucene-indexes">Lucene Indexes</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#bert-model">BERT model</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#bart-model">BART model</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#biobert-model">BioBERT model</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Module Definitions</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../rich/index.html">Rich Answers</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../detailed/index.html">Detailed Answers</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">covid_qna</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Pipeline Details &raquo;</li>
+        
+      
+    
+    <li>Implementation Details</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="implementation-details">Implementation Details</h1>
+<p>This section covers in detail the implementation details along with the reasons and some advantages of using the various modules. Also why the specific modules were chosen and built in that manner.</p>
+<h2 id="lucene-indexes">Lucene Indexes</h2>
+<p>Now looking into the details there are many elments that work independently to make this application possible. The <a href="https://www.semanticscholar.org/cord19/download">data</a> which is provided by Semantic Scholar and Allen Institute of AI is actually a compressed file containing multiple json files in different folders. Each json file has the schema similar to that of a research paper which is something similar to this schema.</p>
+<pre><code>&quot;root&quot;:
+    {
+        &quot;paper_id&quot;:string&quot;[paper id]&quot;
+        &quot;metadata&quot;:{
+            &quot;title&quot;:string&quot;[paper title]&quot;
+            &quot;authors&quot;:[...]
+            &quot;abstract&quot;:string&quot;[abstract]&quot;
+        }
+        &quot;body_text&quot;:
+            [
+                0:{
+                    &quot;text&quot;:string&quot;[section text]&quot;
+                    &quot;cite_spans&quot;:[...]
+                    &quot;section&quot;:string&quot;[section name]&quot;
+                    &quot;ref_spans&quot;:[]
+                }
+                1:{...}
+                2:{...}
+                3:{...}
+                4:{...}
+                ...
+            ]
+        &quot;ref_entries&quot;:
+            {
+                &quot;FIGREF0&quot;:{...}
+            }
+        &quot;back_matter&quot;:[]
+        &quot;bib_entries&quot;:
+            {
+                &quot;BIBREF0&quot;:
+                    {
+                        &quot;title&quot;:string&quot;[reference paper title]&quot;
+                        &quot;authors&quot;:[...]
+                        &quot;year&quot;:int[year]
+                        &quot;venue&quot;:string&quot;[text]&quot;
+                        &quot;volume&quot;:string&quot;[text]&quot;
+                        &quot;issn&quot;:string&quot;&quot;
+                        &quot;pages&quot;:string&quot;[text]&quot;
+                        &quot;other_ids&quot;:{...}
+                    }
+                &quot;BIBREF1&quot;:{...}
+                &quot;BIBREF2&quot;:{...}
+                &quot;BIBREF3&quot;:{...}
+                &quot;BIBREF4&quot;:{...}
+                ...
+            }
+    }
+</code></pre>
+
+<p>Since most of the actual data is present in the abstract and body_text we decided to index every document's data with the abstract and body_text for quicker access. In order to index the data we have used Apache Lucene (Apache Solr and Elasticsearch also uses Lucene indexes in the background). The figure below shows the basic internal structure of an index. The data in a segment is represented abstractly rather than as a realistic representation of the actual data structure. <strong><em>The code for creating lucene index is written in Java which is beyond the scope of this process.</em></strong>
+<img alt="internal structure of an index" src="https://yqintl.alicdn.com/6c7048b0f4747b67bddbf75f8b10bf97ded3a322.png" /></p>
+<p>The below figure represents how indexes are created and retreived while searching is done.
+<img alt="internal structure of an index" src="../index.png" />
+Bystoring the documents in lucene indexes our search works at a complexity of O(1). In order to read more about Lucene indexes you can visit this <a href="https://www.alibabacloud.com/blog/analysis-of-lucene---basic-concepts_594672?spm=a2c41.12761052.0.0">link</a>.</p>
+<hr />
+<h2 id="bert-model">BERT model</h2>
+<p>Once the data we will be using pyserini to query and fetch data from the lucene indexes and use BERT for question answering that is trained on SQuAD dataset. This is required because we would some model that can understand the intent of the user's question and serve only the best matching results. For this BERT is one of the best pre-trained models that is available.  It is designed to work natively on pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of NLP tasks. Now the SQuAD dataset is a reading comprehension dataset, consisting of questions posed by crowdworkers on a set of Wikipedia articles, where the answer to every question is a segment of text, or span, from the corresponding reading passage, or the question might be unanswerable. Thus the BERT model which is finetuned on SQuAD data gives us with almost all the right tools to start building our application. The image below is a representation of how the model is working. 
+<img alt="BERT finetuned on SQuAD" src="https://miro.medium.com/max/1840/1*QhIXsDBEnANLXMA0yONxxA.png" /> 
+The great thing with BERT is that it's embedding is very powerful hence it is very suitable for many NLP tasks. You can read more about how BERT is used for question answering on the SQuAD data in this <a href="https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1194/posters/15848195.pdf">paper</a>. For our code we used the bert-large model finetuned on squad data as a pretrained model in PyTorch from the Hugging Face Transformers library.</p>
+<hr />
+<h2 id="bart-model">BART model</h2>
+<p>After this we used the BART algorithm. BART is a denoising autoencoder for pretraining sequence-to-sequence models. As described in the <a href="https://research.fb.com/wp-content/uploads/2020/06/BART-Denoising-Sequence-to-Sequence-Pre-training-for-Natural-Language-Generation-Translation-and-Comprehension.pdf">paper</a>, BART uses a standard seq2seq/machine translation architecture with a bidirectional encoder (like BERT) and a left-to-right decoder (like GPT). The pretraining task involves randomly shuffling the order of the original sentences and a novel in-filling scheme, where spans of text are replaced with a single mask token as described in it's architecture. 
+<img alt="BART architecture" src="https://miro.medium.com/max/875/0*jVAHupDPqNKf3EgC" />
+As a result, BART performs well on multiple tasks like abstractive dialogue, question answering and summarization. BART is particularly effective when fine tuned for text generation but also works well for comprehension tasks. It matches the performance of RoBERTa with comparable training resources on GLUE and SQuAD, achieves new state-of-the-art results on a range of abstractive dialogue, question answering, and summarization tasks. Therefore we decided to use BART for generating the final rich-text as a short summary of all the answers.
+We used the bart-large model which is trained on the CNN/Daily Mail data set and it has been the canonical data set for summarization work. The data sets consist of news articles and abstractive summaries written by humans. Even though the model that is trained on CNN/Daily Mail data should not be used for generating COVID-19 research articles summary the results obtained has mixed performance but it does provide a coherent summary which is factually correct hence we decided to stick with it(for now).</p>
+<hr />
+<h2 id="biobert-model">BioBERT model</h2>
+<p>At this stage we had achieved our objective of building a search engine on top of research articles but we decided to push it further so that we can also get details from a specific paper for the given question. For this we could have simply utilized the existing BERT model to get out objective and it would have worked out fine. But even in BERT the ability of understanding the medical data was not present. We needed something that could give more context to understand biomedical data so that the results from the specific document really looks to have the detailed answer of the question.
+For these reasons we decided to use the <a href="https://web.stanford.edu/class/archive/cs/cs224n/cs224n.1194/posters/15743952.pdf">BioBERT model</a>. This is a pre-trained bio-medical language representation model for various bio-medical text mining tasks. Tasks such as NER from Bio-medical data, relation extraction, question &amp; answer in the biomedical field can be solved by utilizing this model. Since the model itself is a domain specific language representation model based on BERT and pre-trained on arge-scale biomedical corpora of PMC and PubMed.
+<img alt="BioBERT" src="../biobert_img.png" />
+We mainly used BioBERT for summarization and selecting text that had the most similar matches to the tokens in the question however that is not all. BioBERT can actually be utilized for biomedical NER (which is beyond the scope of this process), and relation extraction for build relations in graphs. Our use case in this case is served by using BioBERT for question answering.</p>
+<hr />
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../rich/index.html" class="btn btn-neutral float-right" title="Rich Answers">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  <p><em>In case of any issues please reach out to <a href="mailto:swastik.biswas@bridgei2i.com">me</a>.</em></p>
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../rich/index.html" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

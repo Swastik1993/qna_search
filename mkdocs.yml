@@ -1,0 +1,15 @@
+site_name: covid_qna
+nav:
+    - Home: index.md
+    - 'Pipeline Details':
+        - 'Implementation Details': 'implementation.md'
+    - 'Module Definitions':
+        - 'Rich Answers': 'rich.md'
+        - 'Detailed Answers': 'detailed.md'
+theme:
+    name: readthedocs
+    highlightjs: true
+    hljs_languages:
+        - python
+markdown_extensions:
+    - admonition

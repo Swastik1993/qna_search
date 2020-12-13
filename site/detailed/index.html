@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Detailed Answers - covid_qna</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Detailed Answers";
+    var mkdocs_page_input_path = "detailed.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/python.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../index.html" class="icon icon-home"> covid_qna</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Pipeline Details</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../implementation/index.html">Implementation Details</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Module Definitions</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../rich/index.html">Rich Answers</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="#">Detailed Answers</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#show_query">show_query()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#show_document">show_document()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#extract_scibert">extract_scibert()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#get_result_id">get_result_id()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cross_match">cross_match()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#show_sections">show_sections()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#highlight_paragraph">highlight_paragraph()</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#show_results">show_results()</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">covid_qna</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Module Definitions &raquo;</li>
+        
+      
+    
+    <li>Detailed Answers</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="functions-serving-rich-answers">Functions serving Rich Answers</h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The main application is broken down into two sections. One is for the rich-text API that gives all the results along with a brief summary of them and another is the detailed-text API that gives the answer from a specific paper but a much more detailed answer not just a summary. 
+This page will define all the function definition that are used for serving the <code>detailed-text</code> answers. The docstring for every function is also present in the code.</p>
+</div>
+<p>These functions are defined in the <code>BertSquad</code> class in <code>modules.py</code> file for serving the rich-text API.</p>
+<pre><code>class BertSquad:
+    &quot;&quot;&quot;
+        The main class which has all the fucntions defined for serving the different API calls.
+        Functions:
+            show_query():
+            show_document():
+            extract_scibert():
+            get_result_id():
+            cross_match():
+            show_sections():
+            highlight_paragraph():
+            show_results():
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="show_query">show_query()</h2>
+<pre><code>def show_query(self, query):
+    &quot;&quot;&quot;
+    Returns HTML format for the searched query.
+
+        Parameters:
+            query (str): the question based on which the answers need to be found.
+
+        Returns:
+            HTML text (str): returns the query with enclosed in some html styling.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="show_document">show_document()</h2>
+<pre><code>def show_document(self, idx, doc):
+    &quot;&quot;&quot;
+    Returns HTML format for the searched query.
+
+        Parameters:
+            idx (str): the index of the document.
+            doc (str): the actual text of the document.
+
+        Returns:
+            HTML text (str): returns the document with the title, authors and id enclosed in some html styling.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="extract_scibert">extract_scibert()</h2>
+<pre><code>def extract_scibert(self, text, tokenizer, model):
+    &quot;&quot;&quot;
+    Extracts the contextualized vectors for the given text/query and abstracts from SciBERT/BioBERT model for highlighting relevant paragraphs.
+
+        Parameters:
+            text (str): the text or query(question) for which the vectrs needs to be found.
+            tokenizer (str): the tokenizer that is going to be used.
+            model (str): the model that is going to be used.
+
+        Returns:
+            text_ids (tensor): the ids for the words as a tensor
+            text_words (list): list of words for state vectors.
+            state (tensor): the state vectors for the text as a tensor.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="get_result_id">get_result_id()</h2>
+<pre><code>def get_result_id(self, query, doc_id, searcher):
+    &quot;&quot;&quot;
+    Returns the document/search result that has been found for the given question and doc_id.
+
+        Parameters:
+            query (str): the given question which for which a doc_id is searched.
+            doc_id (str): the document id on which the question is going to be searched.
+            searcher (str): the searching function that is going to be used to search the doc_id for the question.
+
+        Returns:
+            hit (str): returns the entire document/result that has been found.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="cross_match">cross_match()</h2>
+<pre><code>def cross_match(self, state1, state2):
+    &quot;&quot;&quot;
+    Computes the cosine similarity matrix between the query and each paragraph and returns the state vectors.
+
+        Parameters:
+            state1 (tensor): the query state vectors.
+            state2 (tensor): the paragraph state vectors.
+
+        Returns:
+            sim (tensor): the tensor scores after calculating the cosine similarity metrics.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="show_sections">show_sections()</h2>
+<pre><code>def show_sections(self, section, text):
+    &quot;&quot;&quot;
+    Returns HTML format for the searched query.
+
+        Parameters:
+            section (str): the entire docuemnt portion question based on which the answers need to be found.
+            text (str): the text which will be from the section
+
+        Returns:
+            HTML text (str): returns the text with enclosed in some html styling.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="highlight_paragraph">highlight_paragraph()</h2>
+<pre><code>def highlight_paragraph(self, ptext, rel_words, max_win=10):
+    &quot;&quot;&quot;
+    Highlights the relevant phrases in each paragraph. Any word that had a high similarity to each of the query words is considered relevant.
+    Given these words, we highlight a window of 10 surrounding each of them.
+
+        Parameters:
+            ptext (list): the list of words that are going to be highlighted.
+            rel_words (list): the scores of the words that will be used for highlighting.
+            max_win (int): the window size based on which the number of words will be highlighted. By default value is 10.
+
+        Returns:
+            para (str): returns the highlighted text enclosed in some html styling.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+<h2 id="show_results">show_results()</h2>
+<pre><code>def show_results(self, question, doc_id):
+    &quot;&quot;&quot;
+    Returns HTML format for the searched query.
+
+        Parameters:
+            question (str): query (str): the question based on which the answers need to be found.
+            doc_id (str): the document id on which the question is going to be searched.
+
+        Returns:
+            data (dict): returns the id, title, metadata and text from the document in a dictionary.
+    &quot;&quot;&quot;
+</code></pre>
+
+<hr />
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../rich/index.html" class="btn btn-neutral" title="Rich Answers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  <p><em>In case of any issues please reach out to <a href="mailto:swastik.biswas@bridgei2i.com">me</a>.</em></p>
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../rich/index.html" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
