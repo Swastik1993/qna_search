@@ -37,14 +37,24 @@ os.environ["JAVA_HOME"] = "/usr/lib/jvm/jdk-11.0.2/"
 
 # Initailize tensorflow module globally if you have GPU else comment out this part. Please check the no_gpu branch. 
 def embed_useT():
-   module = '/sentence_wise_email/module/module_useT'
-   with tf.Graph().as_default():
-       sentences = tf.compat.v1.placeholder(tf.string)
-       embed = hub.Module(module)
-       embeddings = embed(sentences)
-       session = tf.compat.v1.train.MonitoredSession()
-   return lambda x: session.run(embeddings, {sentences: x})
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    if gpus:
+        # Restrict TensorFlow to only allocate 4GB of memory on the first GPU
+        try:
+            tf.config.experimental.set_virtual_device_configuration(gpus[0], [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
+        except RuntimeError as e:
+            print("Error Occured", e)
+    module = '/home/swastik/Projects/Others/sentence_wise_email/module/module_useT'
+    #gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.4)
+    #sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+    with tf.Graph().as_default():
+        sentences = tf.compat.v1.placeholder(tf.string)
+        embed = hub.Module(module)
+        embeddings = embed(sentences)
+        session = tf.compat.v1.train.MonitoredSession()
+    return lambda x: session.run(embeddings, {sentences: x})
 embed_fn = embed_useT()
+
 
 
 class BertSquad:
