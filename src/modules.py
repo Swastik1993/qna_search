@@ -359,6 +359,20 @@ class BertSquad:
             else:
                 answers.pop(c)
         
+        ## now rerank based on semantic similarity of the answers to the question
+        cList = list(answers.keys())
+        allAnswers = [answers[c]['full_answer'] for c in cList]
+
+        messages = [question]+allAnswers
+
+        encoding_matrix = embed_fn(messages)
+        gc.collect()
+        similarity_matrix = np.inner(encoding_matrix, encoding_matrix)
+        rankings = similarity_matrix[1:, 0]
+
+        for i, c in enumerate(cList):
+            answers[rankings[i]] = answers.pop(c)
+        
         ## forming a pandas dataframe
         confidence = list(answers.keys())
         confidence.sort(reverse=True)
